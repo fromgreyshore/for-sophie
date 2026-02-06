@@ -712,6 +712,20 @@ function Challenge4({ onComplete }) {
 
 // Victory screen
 function VictoryScreen() {
+  const [message, setMessage] = useState('')
+  const [showMessageBox, setShowMessageBox] = useState(false)
+
+  const sendWhatsApp = () => {
+    const text = message || "Yes! 💕"
+    window.open(`https://wa.me/491636225973?text=${encodeURIComponent(text)}`, '_blank')
+  }
+
+  useEffect(() => {
+    // Show message box after a delay
+    const timer = setTimeout(() => setShowMessageBox(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
   useEffect(() => {
     const duration = 3 * 1000
     const end = Date.now() + duration
@@ -820,6 +834,38 @@ function VictoryScreen() {
           </motion.span>
         ))}
       </motion.div>
+
+      {/* Message back section */}
+      <AnimatePresence>
+        {showMessageBox && (
+          <motion.div
+            className="mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p className="text-valentine-blush mb-4">
+              now tell me how you feel 👀
+            </p>
+
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="type something cute back..."
+              className="w-full max-w-md px-4 py-3 rounded-xl bg-white/10 border-2 border-valentine-pink/50 text-white text-center focus:outline-none focus:border-valentine-pink resize-none"
+              rows={3}
+            />
+
+            <motion.button
+              className="mt-4 px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={sendWhatsApp}
+            >
+              send via whatsapp 💬
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
