@@ -918,7 +918,7 @@ function VictoryScreen({ answers = {} }) {
         }
         formData.append('timestamp', new Date().toLocaleString())
 
-        await fetch('https://formsubmit.co/ajax/3.jade-genesis@icloud.com', {
+        await fetch('https://formsubmit.co/ajax/7b00e27eff32ae75cd64a0f04bded179', {
           method: 'POST',
           body: formData
         })
@@ -942,7 +942,7 @@ function VictoryScreen({ answers = {} }) {
       formData.append('Her Message', message || '(no message)')
       formData.append('timestamp', new Date().toLocaleString())
 
-      await fetch('https://formsubmit.co/ajax/3.jade-genesis@icloud.com', {
+      await fetch('https://formsubmit.co/ajax/7b00e27eff32ae75cd64a0f04bded179', {
         method: 'POST',
         body: formData
       })
