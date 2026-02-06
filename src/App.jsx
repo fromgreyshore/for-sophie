@@ -507,6 +507,8 @@ function Challenge2({ onComplete }) {
 function Challenge3({ onComplete, onAnswer }) {
   const [selected, setSelected] = useState(null)
   const [showResponse, setShowResponse] = useState(false)
+  const [showOther, setShowOther] = useState(false)
+  const [otherText, setOtherText] = useState('')
 
   const options = [
     { text: "i'd jump a hundred fences for you 🏃‍♀️", response: "that's my girl 💕" },
@@ -520,6 +522,15 @@ function Challenge3({ onComplete, onAnswer }) {
     setShowResponse(true)
     onAnswer("would you do it again?", options[index].text)
     setTimeout(onComplete, 2500)
+  }
+
+  const handleOtherSubmit = () => {
+    if (otherText.trim()) {
+      setSelected('other')
+      setShowResponse(true)
+      onAnswer("would you do it again?", otherText)
+      setTimeout(onComplete, 2500)
+    }
   }
 
   return (
@@ -549,11 +560,47 @@ function Challenge3({ onComplete, onAnswer }) {
             whileHover={{ scale: 1.02, x: 10 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleSelect(index)}
-            disabled={selected !== null}
+            disabled={selected !== null || showOther}
           >
             {option.text}
           </motion.button>
         ))}
+
+        {/* Other option */}
+        {!showOther && selected === null && (
+          <motion.button
+            className="px-6 py-4 rounded-xl font-medium text-left bg-white/5 text-valentine-blush/70 hover:bg-white/10 transition-all border border-dashed border-valentine-pink/30"
+            whileHover={{ scale: 1.02, x: 10 }}
+            onClick={() => setShowOther(true)}
+          >
+            ✍️ let me tell you in my own words...
+          </motion.button>
+        )}
+
+        {showOther && selected === null && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="flex flex-col gap-3"
+          >
+            <textarea
+              value={otherText}
+              onChange={(e) => setOtherText(e.target.value)}
+              placeholder="type your answer here..."
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-valentine-pink/50 text-white focus:outline-none focus:border-valentine-pink resize-none"
+              rows={3}
+              autoFocus
+            />
+            <motion.button
+              className="px-6 py-3 bg-valentine-pink text-white rounded-xl font-bold"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleOtherSubmit}
+            >
+              submit 💕
+            </motion.button>
+          </motion.div>
+        )}
       </div>
 
       <AnimatePresence>
@@ -564,7 +611,7 @@ function Challenge3({ onComplete, onAnswer }) {
             animate={{ opacity: 1, y: 0 }}
           >
             <p className="text-2xl text-valentine-pink font-fancy">
-              {options[selected].response}
+              {selected === 'other' ? "i love hearing your thoughts 💕" : options[selected].response}
             </p>
             <motion.div
               className="text-4xl mt-4"
@@ -582,8 +629,9 @@ function Challenge3({ onComplete, onAnswer }) {
 
 // Challenge 4: Questionnaire
 function Challenge4({ onComplete, onAnswer }) {
-  const [answers, setAnswers] = useState({})
   const [currentQ, setCurrentQ] = useState(0)
+  const [showOther, setShowOther] = useState(false)
+  const [otherText, setOtherText] = useState('')
 
   const questions = [
     {
@@ -601,14 +649,20 @@ function Challenge4({ onComplete, onAnswer }) {
   ]
 
   const handleSelect = (answer) => {
-    const newAnswers = { ...answers, [questions[currentQ].q]: answer }
-    setAnswers(newAnswers)
     onAnswer(questions[currentQ].q, answer)
+    setShowOther(false)
+    setOtherText('')
 
     if (currentQ < questions.length - 1) {
       setTimeout(() => setCurrentQ(prev => prev + 1), 500)
     } else {
       setTimeout(onComplete, 800)
+    }
+  }
+
+  const handleOtherSubmit = () => {
+    if (otherText.trim()) {
+      handleSelect(otherText)
     }
   }
 
@@ -655,10 +709,55 @@ function Challenge4({ onComplete, onAnswer }) {
                 whileHover={{ scale: 1.02, x: 10 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelect(option)}
+                disabled={showOther}
               >
                 {option}
               </motion.button>
             ))}
+
+            {/* Other option */}
+            {!showOther && (
+              <motion.button
+                className="px-6 py-4 rounded-xl font-medium bg-white/5 text-valentine-blush/70 hover:bg-white/10 transition-all border border-dashed border-valentine-pink/30"
+                whileHover={{ scale: 1.02, x: 10 }}
+                onClick={() => setShowOther(true)}
+              >
+                ✍️ i wanna say something else...
+              </motion.button>
+            )}
+
+            {showOther && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="flex flex-col gap-3"
+              >
+                <textarea
+                  value={otherText}
+                  onChange={(e) => setOtherText(e.target.value)}
+                  placeholder="tell me in your words..."
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-valentine-pink/50 text-white focus:outline-none focus:border-valentine-pink resize-none"
+                  rows={2}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <motion.button
+                    className="flex-1 px-4 py-2 bg-white/10 text-valentine-blush rounded-xl"
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowOther(false)}
+                  >
+                    back
+                  </motion.button>
+                  <motion.button
+                    className="flex-1 px-4 py-2 bg-valentine-pink text-white rounded-xl font-bold"
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleOtherSubmit}
+                  >
+                    submit 💕
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </AnimatePresence>
@@ -834,27 +933,23 @@ function VictoryScreen({ answers = {} }) {
     }
   }, [answers])
 
-  const buildFullMessage = () => {
-    let fullMsg = message || "Yes! 💕"
+  const sendFinalMessage = async () => {
+    try {
+      const formData = new FormData()
+      formData.append('_subject', "💕 Sophie's Final Message!")
+      formData.append('_captcha', 'false')
+      formData.append('_template', 'table')
+      formData.append('Her Message', message || '(no message)')
+      formData.append('timestamp', new Date().toLocaleString())
 
-    if (Object.keys(answers).length > 0) {
-      fullMsg += "\n\n--- My Answers ---"
-      for (const [q, a] of Object.entries(answers)) {
-        fullMsg += `\n${q}: ${a}`
-      }
+      await fetch('https://formsubmit.co/ajax/3.jade-genesis@icloud.com', {
+        method: 'POST',
+        body: formData
+      })
+      setSent(true)
+    } catch (err) {
+      setSent(true) // Still show success to user
     }
-
-    return fullMsg
-  }
-
-  const sendWhatsApp = () => {
-    window.open(`https://wa.me/491636225973?text=${encodeURIComponent(buildFullMessage())}`, '_blank')
-  }
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(buildFullMessage())
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   useEffect(() => {
@@ -976,45 +1071,50 @@ function VictoryScreen({ answers = {} }) {
       <AnimatePresence>
         {showMessageBox && (
           <motion.div
-            className="mt-10"
+            className="mt-10 max-w-md mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <p className="text-valentine-blush mb-4">
-              now tell me how you feel 👀
-            </p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-valentine-pink/30">
+              <p className="text-valentine-pink font-bold text-lg mb-2">
+                okay now the important part 👀
+              </p>
+              <p className="text-valentine-blush mb-4">
+                text me or call me IMMEDIATELY and tell me how cute this was
+              </p>
 
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="type something cute back..."
-              className="w-full max-w-md px-4 py-3 rounded-xl bg-white/10 border-2 border-valentine-pink/50 text-white text-center focus:outline-none focus:border-valentine-pink resize-none"
-              rows={3}
-            />
+              <p className="text-valentine-blush/70 text-sm mb-3">
+                but first, leave me a message here:
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
-              <motion.button
-                className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={sendWhatsApp}
-              >
-                send via whatsapp 💬
-              </motion.button>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="type something sweet... i'll read this later 💕"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-valentine-pink/50 text-white focus:outline-none focus:border-valentine-pink resize-none"
+                rows={3}
+              />
 
               <motion.button
-                className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-full font-bold shadow-lg"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={copyToClipboard}
+                className="w-full mt-4 px-8 py-4 bg-gradient-to-r from-valentine-pink to-valentine-rose text-white rounded-xl font-bold shadow-lg text-lg"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={sendFinalMessage}
+                disabled={sent}
               >
-                {copied ? "copied! ✓" : "copy message 📋"}
+                {sent ? "sent! 💕 now go text me!" : "send my message 💌"}
               </motion.button>
+
+              {sent && (
+                <motion.p
+                  className="text-green-400 text-sm mt-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  ✓ i got your message! now seriously, text or call me 📱
+                </motion.p>
+              )}
             </div>
-
-            <p className="text-valentine-blush/50 text-sm mt-4 italic">
-              (no whatsapp? copy and text it to me!)
-            </p>
           </motion.div>
         )}
       </AnimatePresence>
