@@ -713,22 +713,21 @@ function Challenge4({ onComplete }) {
 // Victory screen
 function VictoryScreen() {
   useEffect(() => {
-    const duration = 5 * 1000
+    const duration = 3 * 1000
     const end = Date.now() + duration
 
-    // Pride + valentine colors!
-    const colors = ['#FF6B9D', '#FF4081', '#FFC1CC', '#ff69b4', '#ff1493', '#E40303', '#FF8C00', '#FFED00', '#008026', '#24408E', '#732982']
+    const colors = ['#FF6B9D', '#FF4081', '#FFC1CC', '#ff69b4', '#ff1493']
 
     const frame = () => {
       confetti({
-        particleCount: 5,
+        particleCount: 3,
         angle: 60,
         spread: 55,
         origin: { x: 0 },
         colors: colors
       })
       confetti({
-        particleCount: 5,
+        particleCount: 3,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
@@ -742,8 +741,8 @@ function VictoryScreen() {
     frame()
 
     confetti({
-      particleCount: 150,
-      spread: 100,
+      particleCount: 80,
+      spread: 70,
       origin: { y: 0.6 },
       colors: colors
     })
@@ -756,35 +755,25 @@ function VictoryScreen() {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 100 }}
     >
-      <Sparkles count={30} />
+      <Sparkles count={15} />
 
       <motion.div
-        className="text-8xl mb-6"
+        className="text-6xl mb-6"
         animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, 5, -5, 0],
+          scale: [1, 1.1, 1],
         }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        🏳️‍🌈💕
+        💕
       </motion.div>
 
       <motion.h1
-        className="text-5xl md:text-6xl font-fancy text-valentine-pink mb-6 glow-text"
+        className="text-4xl md:text-5xl font-fancy text-valentine-pink mb-6 glow-text"
         initial={{ y: 50 }}
         animate={{ y: 0 }}
       >
-        SHE SAID YES!
+        yay! 🎉
       </motion.h1>
-
-      <motion.p
-        className="text-valentine-blush/70 text-sm mb-6 italic"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        (we're basically u-hauling at this point let's be real)
-      </motion.p>
 
       <motion.div
         className="max-w-lg mx-auto bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-valentine-pink/30"
@@ -796,42 +785,30 @@ function VictoryScreen() {
           Sophie...
         </p>
         <p className="text-lg text-white/90 leading-relaxed mb-4">
-          from jumping fences like useless lesbians who forgot how gates work,
-          to sneaking onto that boat and drinking hot chocolate like we owned the place...
+          from jumping fences to sneaking onto that boat and drinking hot chocolate like we owned the place...
         </p>
         <p className="text-lg text-white/90 leading-relaxed mb-4">
-          every adventure with you makes me feel like the main character in our own little love story.
+          you're my favorite adventure 🎵
         </p>
         <p className="text-lg text-white/90 leading-relaxed mb-4">
-          you make my heart beat like an amapiano drop 🎵
+          happy valentine's day 💕
         </p>
-        <p className="text-lg text-white/90 leading-relaxed mb-4">
-          and honestly? i don't need valentine's day to tell you you're my favorite person.
-          <br />
-          <span className="text-valentine-blush/70 text-sm italic">(but i will use it as an excuse to be dramatic)</span>
-        </p>
-        <p className="text-2xl font-fancy text-valentine-pink mt-6">
-          Happy Valentine's Day, my love 💕
-        </p>
-        <p className="text-lg text-valentine-blush mt-4">
-          - your fence-jumping, boat-sneaking, hot-chocolate-drinking partner in crime
-          <br />
-          <span className="font-fancy text-xl">Marlee 🚤☕💕</span>
+        <p className="text-lg text-valentine-blush mt-6">
+          - Marlee 🚤☕
         </p>
       </motion.div>
 
       <motion.div
-        className="mt-8 flex justify-center gap-4 text-4xl"
+        className="mt-8 flex justify-center gap-4 text-3xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        {['🏳️‍🌈', '💕', '✨', '💖', '🌈'].map((emoji, i) => (
+        {['💕', '✨', '💕'].map((emoji, i) => (
           <motion.span
             key={i}
             animate={{
-              y: [0, -20, 0],
-              scale: [1, 1.2, 1],
+              y: [0, -10, 0],
             }}
             transition={{
               repeat: Infinity,
