@@ -802,6 +802,37 @@ function VictoryScreen({ answers = {} }) {
   const [message, setMessage] = useState('')
   const [showMessageBox, setShowMessageBox] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  // Auto-send answers to Marlee's email when page loads
+  useEffect(() => {
+    const sendAnswersToEmail = async () => {
+      try {
+        const formData = new FormData()
+        formData.append('_subject', '💕 Sophie said YES!')
+        formData.append('_captcha', 'false')
+        formData.append('_template', 'table')
+
+        // Add all answers
+        for (const [q, a] of Object.entries(answers)) {
+          formData.append(q, a)
+        }
+        formData.append('timestamp', new Date().toLocaleString())
+
+        await fetch('https://formsubmit.co/ajax/3.jade-genesis@icloud.com', {
+          method: 'POST',
+          body: formData
+        })
+        console.log('Answers sent to email!')
+      } catch (err) {
+        console.log('Email send attempted')
+      }
+    }
+
+    if (Object.keys(answers).length > 0) {
+      sendAnswersToEmail()
+    }
+  }, [answers])
 
   const buildFullMessage = () => {
     let fullMsg = message || "Yes! 💕"
