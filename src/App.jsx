@@ -1,6 +1,123 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
+
+// Sound effects hook
+const useSound = () => {
+  const playPop = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.value = 600
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.1)
+    } catch (e) {}
+  }, [])
+
+  const playSuccess = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const notes = [523, 659, 784] // C, E, G chord
+
+      notes.forEach((freq, i) => {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.frequency.value = freq
+        oscillator.type = 'sine'
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.1)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3)
+
+        oscillator.start(audioContext.currentTime + i * 0.1)
+        oscillator.stop(audioContext.currentTime + i * 0.1 + 0.3)
+      })
+    } catch (e) {}
+  }, [])
+
+  const playHeart = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.value = 800
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15)
+
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.15)
+    } catch (e) {}
+  }, [])
+
+  return { playPop, playSuccess, playHeart }
+}
+
+// Mini confetti burst
+const miniConfetti = () => {
+  confetti({
+    particleCount: 30,
+    spread: 60,
+    origin: { y: 0.7 },
+    colors: ['#FF6B9D', '#FF4081', '#FFC1CC']
+  })
+}
+
+// Loading screen
+function LoadingScreen({ onComplete }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 2000)
+    return () => clearTimeout(timer)
+  }, [onComplete])
+
+  return (
+    <motion.div
+      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a2e] to-[#0f0f23]"
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="text-6xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          rotate: [0, 10, -10, 0]
+        }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+      >
+        💕
+      </motion.div>
+      <motion.p
+        className="mt-6 text-valentine-blush text-lg"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+      >
+        loading something special...
+      </motion.p>
+      <div className="mt-4 w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-gradient-to-r from-valentine-pink to-valentine-rose"
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 1.8, ease: 'easeInOut' }}
+        />
+      </div>
+    </motion.div>
+  )
+}
 
 // Floating hearts background component
 function FloatingHearts() {
@@ -220,7 +337,7 @@ function NoButton({ onTrapped }) {
 }
 
 // The runaway YES button - now with chase game!
-function RunawayYesButton({ onCaught, noTrapped }) {
+function RunawayYesButton({ onCaught, noTrapped, onMove }) {
   const [chasePhase, setChasePhase] = useState(0)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [canMove, setCanMove] = useState(true)
@@ -241,24 +358,30 @@ function RunawayYesButton({ onCaught, noTrapped }) {
     { x: 0, y: 0 },       // back to center for capture
   ]
 
-  const handleMouseEnter = () => {
+  const advanceChase = () => {
     if (!noTrapped) return
     if (!canMove) return
 
     if (chasePhase < 4) {
       setCanMove(false)
+      onMove && onMove() // play sound
       setChasePhase(prev => prev + 1)
       setPosition(positions[chasePhase + 1])
-      // Slow down - wait 1.5 seconds before allowing next move
       setTimeout(() => setCanMove(true), 1500)
     }
   }
 
+  const handleMouseEnter = () => advanceChase()
+
+  // Mobile: advance on tap if not final phase
   const handleClick = () => {
     if (!noTrapped) return
 
     if (chasePhase >= 4) {
       onCaught()
+    } else {
+      // Mobile support - tap to chase
+      advanceChase()
     }
   }
 
@@ -401,7 +524,7 @@ function Challenge1({ onComplete }) {
 }
 
 // Challenge 2: Catch the hearts mini-game
-function Challenge2({ onComplete }) {
+function Challenge2({ onComplete, onCatch }) {
   const [caught, setCaught] = useState(0)
   const [hearts, setHearts] = useState([])
   const target = 5
@@ -437,6 +560,7 @@ function Challenge2({ onComplete }) {
 
   const catchHeart = (id) => {
     setHearts(prev => prev.filter(h => h.id !== id))
+    onCatch && onCatch() // play sound
     setCaught(prev => {
       const newCount = prev + 1
       if (newCount >= target) {
@@ -1217,14 +1341,18 @@ function PasscodeScreen({ onUnlock }) {
 
 // Main App
 export default function App() {
+  const [loading, setLoading] = useState(true)
   const [unlocked, setUnlocked] = useState(false)
   const [scene, setScene] = useState('intro')
   const [noTrapped, setNoTrapped] = useState(false)
   const [yesCaught, setYesCaught] = useState(false)
   const [challengeIndex, setChallengeIndex] = useState(0)
   const [answers, setAnswers] = useState({})
+  const { playPop, playSuccess, playHeart } = useSound()
 
   const handleYesCaught = () => {
+    playSuccess()
+    miniConfetti()
     setYesCaught(true)
   }
 
@@ -1233,6 +1361,8 @@ export default function App() {
   }
 
   const handleChallengeComplete = () => {
+    playSuccess()
+    miniConfetti()
     if (challengeIndex < 4) {
       setChallengeIndex(prev => prev + 1)
     } else {
@@ -1240,9 +1370,13 @@ export default function App() {
     }
   }
 
+  if (loading) {
+    return <LoadingScreen onComplete={() => setLoading(false)} />
+  }
+
   const challenges = [
     <Challenge1 key="c1" onComplete={handleChallengeComplete} />,
-    <Challenge2 key="c2" onComplete={handleChallengeComplete} />,
+    <Challenge2 key="c2" onComplete={handleChallengeComplete} onCatch={playHeart} />,
     <Challenge3 key="c3" onComplete={handleChallengeComplete} onAnswer={handleAnswer} />,
     <Challenge4 key="c4" onComplete={handleChallengeComplete} onAnswer={handleAnswer} />,
     <Challenge5 key="c5" onComplete={handleChallengeComplete} />,
@@ -1287,7 +1421,7 @@ export default function App() {
               </motion.p>
 
               <div className="flex justify-center items-center gap-8 flex-wrap min-h-[200px]">
-                <RunawayYesButton onCaught={handleYesCaught} noTrapped={noTrapped} />
+                <RunawayYesButton onCaught={handleYesCaught} noTrapped={noTrapped} onMove={playPop} />
                 <NoButton onTrapped={() => setNoTrapped(true)} />
               </div>
 
