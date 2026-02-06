@@ -101,7 +101,7 @@ function NoButton({ onTrapped }) {
     "I'M NOT AN OPTION!!",
     "WRONG ANSWER BESTIE",
     "absolutely not",
-    "this is homophobic",
+    "nope nope nope",
     "I'M CALLING THE POLICE",
   ])
   const [currentMessage, setCurrentMessage] = useState(0)
@@ -188,7 +188,7 @@ function NoButton({ onTrapped }) {
       transition={{ type: "spring", stiffness: 100, damping: 10 }}
     >
       <motion.button
-        className="px-12 py-6 bg-gray-600 text-white rounded-xl font-bold shadow-lg relative text-2xl"
+        className="px-14 py-8 bg-gray-600 text-white rounded-xl font-bold shadow-lg relative text-3xl"
         animate={{
           rotate: [0, -15, 15, -15, 15, 0],
           scale: [1, 0.9, 1.1, 0.9, 1],
@@ -223,7 +223,7 @@ function NoButton({ onTrapped }) {
 function RunawayYesButton({ onCaught, noTrapped }) {
   const [chasePhase, setChasePhase] = useState(0)
   const [position, setPosition] = useState({ x: 0, y: 0 })
-  const containerRef = useRef(null)
+  const [canMove, setCanMove] = useState(true)
 
   const chaseMessages = [
     { text: "come get me 😏", subtext: "if you can..." },
@@ -242,11 +242,15 @@ function RunawayYesButton({ onCaught, noTrapped }) {
   ]
 
   const handleMouseEnter = () => {
-    if (!noTrapped) return // Don't run until NO is trapped
+    if (!noTrapped) return
+    if (!canMove) return
 
     if (chasePhase < 4) {
+      setCanMove(false)
       setChasePhase(prev => prev + 1)
       setPosition(positions[chasePhase + 1])
+      // Slow down - wait 1.5 seconds before allowing next move
+      setTimeout(() => setCanMove(true), 1500)
     }
   }
 
@@ -255,10 +259,6 @@ function RunawayYesButton({ onCaught, noTrapped }) {
 
     if (chasePhase >= 4) {
       onCaught()
-    } else {
-      // If they manage to click early, still advance the chase
-      setChasePhase(prev => Math.min(prev + 1, 4))
-      setPosition(positions[Math.min(chasePhase + 1, 4)])
     }
   }
 
@@ -269,7 +269,7 @@ function RunawayYesButton({ onCaught, noTrapped }) {
       transition={{ type: "spring", stiffness: 200, damping: 20 }}
     >
       <motion.button
-        className="px-12 py-6 bg-gradient-to-r from-valentine-pink to-valentine-rose text-white rounded-xl font-bold shadow-lg glow text-2xl relative"
+        className="px-14 py-8 bg-gradient-to-r from-valentine-pink to-valentine-rose text-white rounded-xl font-bold shadow-lg glow text-3xl relative"
         animate={noTrapped ? {
           scale: [1, 1.05, 1],
         } : {
@@ -284,7 +284,7 @@ function RunawayYesButton({ onCaught, noTrapped }) {
         Yes
         {!noTrapped && (
           <motion.span
-            className="absolute -top-8 -right-4 text-3xl"
+            className="absolute -top-10 -right-4 text-4xl"
             animate={{ rotate: [0, 20, 0, 20, 0] }}
             transition={{ repeat: Infinity, duration: 0.6 }}
           >
@@ -296,19 +296,19 @@ function RunawayYesButton({ onCaught, noTrapped }) {
       {/* Chase messages */}
       {noTrapped && (
         <motion.div
-          className="absolute -top-20 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
+          className="absolute -top-24 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
           key={chasePhase}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <p className="text-valentine-pink font-bold text-lg">{chaseMessages[chasePhase].text}</p>
-          <p className="text-valentine-blush/70 text-sm">{chaseMessages[chasePhase].subtext}</p>
+          <p className="text-valentine-pink font-bold text-xl">{chaseMessages[chasePhase].text}</p>
+          <p className="text-valentine-blush/70 text-base">{chaseMessages[chasePhase].subtext}</p>
         </motion.div>
       )}
 
       {!noTrapped && (
         <motion.span
-          className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-valentine-blush whitespace-nowrap"
+          className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-base text-valentine-blush whitespace-nowrap"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
         >
@@ -318,11 +318,11 @@ function RunawayYesButton({ onCaught, noTrapped }) {
 
       {/* Progress dots for chase */}
       {noTrapped && chasePhase < 4 && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-1">
+        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex gap-2">
           {[0, 1, 2, 3, 4].map(i => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full ${i <= chasePhase ? 'bg-valentine-pink' : 'bg-white/30'}`}
+              className={`w-3 h-3 rounded-full ${i <= chasePhase ? 'bg-valentine-pink' : 'bg-white/30'}`}
             />
           ))}
         </div>
@@ -504,7 +504,7 @@ function Challenge2({ onComplete }) {
 }
 
 // Challenge 3: The fence/boat story question
-function Challenge3({ onComplete }) {
+function Challenge3({ onComplete, onAnswer }) {
   const [selected, setSelected] = useState(null)
   const [showResponse, setShowResponse] = useState(false)
 
@@ -512,12 +512,13 @@ function Challenge3({ onComplete }) {
     { text: "i'd jump a hundred fences for you 🏃‍♀️", response: "that's my girl 💕" },
     { text: "only if there's hot chocolate after ☕", response: "deal. i'll bring the thermos, you bring the vibes 😘" },
     { text: "i'd sneak into a thousand boats with you 🚤", response: "best date ever and i will die on this hill" },
-    { text: "babe i'd commit CRIMES for you", response: "that's the queer energy i fell for 🏳️‍🌈" },
+    { text: "babe i'd commit CRIMES for you", response: "that's the energy i fell for 💕" },
   ]
 
   const handleSelect = (index) => {
     setSelected(index)
     setShowResponse(true)
+    onAnswer("would you do it again?", options[index].text)
     setTimeout(onComplete, 2500)
   }
 
@@ -579,8 +580,94 @@ function Challenge3({ onComplete }) {
   )
 }
 
-// Challenge 4: Vulnerable storytelling moment (NEW - replaces "I love Marlee")
-function Challenge4({ onComplete }) {
+// Challenge 4: Questionnaire
+function Challenge4({ onComplete, onAnswer }) {
+  const [answers, setAnswers] = useState({})
+  const [currentQ, setCurrentQ] = useState(0)
+
+  const questions = [
+    {
+      q: "what's your favorite thing about us?",
+      options: ["the adventures", "the vibes", "the chaos", "everything tbh"]
+    },
+    {
+      q: "best date idea?",
+      options: ["sneaking into places", "cozy night in", "spontaneous road trip", "anywhere with you"]
+    },
+    {
+      q: "what makes me a good valentine?",
+      options: ["you're extra (in a good way)", "you make me laugh", "you get me", "all of the above"]
+    }
+  ]
+
+  const handleSelect = (answer) => {
+    const newAnswers = { ...answers, [questions[currentQ].q]: answer }
+    setAnswers(newAnswers)
+    onAnswer(questions[currentQ].q, answer)
+
+    if (currentQ < questions.length - 1) {
+      setTimeout(() => setCurrentQ(prev => prev + 1), 500)
+    } else {
+      setTimeout(onComplete, 800)
+    }
+  }
+
+  return (
+    <motion.div
+      className="text-center"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -50 }}
+    >
+      <h2 className="text-2xl font-fancy text-valentine-pink mb-2 glow-text">
+        quick questions 💭
+      </h2>
+      <p className="text-valentine-blush/60 text-sm mb-6 italic">
+        (be honest, i'll see your answers 👀)
+      </p>
+
+      {/* Progress */}
+      <div className="flex justify-center gap-2 mb-6">
+        {questions.map((_, i) => (
+          <div
+            key={i}
+            className={`w-3 h-3 rounded-full transition-all ${
+              i < currentQ ? 'bg-valentine-pink' : i === currentQ ? 'bg-valentine-rose' : 'bg-white/20'
+            }`}
+          />
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentQ}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+        >
+          <p className="text-xl text-valentine-blush mb-6">{questions[currentQ].q}</p>
+
+          <div className="flex flex-col gap-3 max-w-md mx-auto">
+            {questions[currentQ].options.map((option, i) => (
+              <motion.button
+                key={i}
+                className="px-6 py-4 rounded-xl font-medium bg-white/10 text-valentine-blush hover:bg-white/20 transition-all"
+                whileHover={{ scale: 1.02, x: 10 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSelect(option)}
+              >
+                {option}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+// Challenge 5: Vulnerable storytelling moment
+function Challenge5({ onComplete }) {
   const [stage, setStage] = useState(0)
 
   const messages = [
@@ -711,13 +798,32 @@ function Challenge4({ onComplete }) {
 }
 
 // Victory screen
-function VictoryScreen() {
+function VictoryScreen({ answers = {} }) {
   const [message, setMessage] = useState('')
   const [showMessageBox, setShowMessageBox] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const buildFullMessage = () => {
+    let fullMsg = message || "Yes! 💕"
+
+    if (Object.keys(answers).length > 0) {
+      fullMsg += "\n\n--- My Answers ---"
+      for (const [q, a] of Object.entries(answers)) {
+        fullMsg += `\n${q}: ${a}`
+      }
+    }
+
+    return fullMsg
+  }
 
   const sendWhatsApp = () => {
-    const text = message || "Yes! 💕"
-    window.open(`https://wa.me/491636225973?text=${encodeURIComponent(text)}`, '_blank')
+    window.open(`https://wa.me/491636225973?text=${encodeURIComponent(buildFullMessage())}`, '_blank')
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(buildFullMessage())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   useEffect(() => {
@@ -855,14 +961,29 @@ function VictoryScreen() {
               rows={3}
             />
 
-            <motion.button
-              className="mt-4 px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={sendWhatsApp}
-            >
-              send via whatsapp 💬
-            </motion.button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
+              <motion.button
+                className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={sendWhatsApp}
+              >
+                send via whatsapp 💬
+              </motion.button>
+
+              <motion.button
+                className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-full font-bold shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={copyToClipboard}
+              >
+                {copied ? "copied! ✓" : "copy message 📋"}
+              </motion.button>
+            </div>
+
+            <p className="text-valentine-blush/50 text-sm mt-4 italic">
+              (no whatsapp? copy and text it to me!)
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -970,13 +1091,18 @@ export default function App() {
   const [noTrapped, setNoTrapped] = useState(false)
   const [yesCaught, setYesCaught] = useState(false)
   const [challengeIndex, setChallengeIndex] = useState(0)
+  const [answers, setAnswers] = useState({})
 
   const handleYesCaught = () => {
     setYesCaught(true)
   }
 
+  const handleAnswer = (question, answer) => {
+    setAnswers(prev => ({ ...prev, [question]: answer }))
+  }
+
   const handleChallengeComplete = () => {
-    if (challengeIndex < 3) {
+    if (challengeIndex < 4) {
       setChallengeIndex(prev => prev + 1)
     } else {
       setScene('victory')
@@ -986,8 +1112,9 @@ export default function App() {
   const challenges = [
     <Challenge1 key="c1" onComplete={handleChallengeComplete} />,
     <Challenge2 key="c2" onComplete={handleChallengeComplete} />,
-    <Challenge3 key="c3" onComplete={handleChallengeComplete} />,
-    <Challenge4 key="c4" onComplete={handleChallengeComplete} />,
+    <Challenge3 key="c3" onComplete={handleChallengeComplete} onAnswer={handleAnswer} />,
+    <Challenge4 key="c4" onComplete={handleChallengeComplete} onAnswer={handleAnswer} />,
+    <Challenge5 key="c5" onComplete={handleChallengeComplete} />,
   ]
 
   if (!unlocked) {
@@ -1073,7 +1200,7 @@ export default function App() {
 
               {/* Progress dots */}
               <div className="flex justify-center gap-2 mb-8">
-                {[0, 1, 2, 3].map((i) => (
+                {[0, 1, 2, 3, 4].map((i) => (
                   <motion.div
                     key={i}
                     className={`w-3 h-3 rounded-full ${
@@ -1095,7 +1222,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {scene === 'victory' && <VictoryScreen key="victory" />}
+          {scene === 'victory' && <VictoryScreen key="victory" answers={answers} />}
         </AnimatePresence>
       </div>
     </div>
