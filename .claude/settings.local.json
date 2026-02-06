@@ -21,7 +21,13 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(~/bin/gh repo create:*)",
+      "Bash(~/bin/gh auth refresh:*)",
+      "Bash(git push:*)",
+      "Bash(~/bin/gh auth setup-git:*)",
+      "Bash(~/bin/gh api repos/fromgreyshore/for-sophie/pages -X POST -f build_type=workflow)",
+      "Bash(~/bin/gh run list:*)"
     ]
   }
 }

@@ -847,8 +847,102 @@ function VictoryScreen() {
   )
 }
 
+// Passcode entry screen
+function PasscodeScreen({ onUnlock }) {
+  const [code, setCode] = useState('')
+  const [error, setError] = useState(false)
+  const [shake, setShake] = useState(false)
+  const correctCode = 'itsme'
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (code.toLowerCase() === correctCode) {
+      onUnlock()
+    } else {
+      setError(true)
+      setShake(true)
+      setTimeout(() => setShake(false), 500)
+      setTimeout(() => setError(false), 2000)
+    }
+  }
+
+  return (
+    <motion.div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <FloatingHearts />
+
+      <motion.div
+        className="relative z-10 text-center p-8"
+        animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="text-6xl mb-6"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          🔐
+        </motion.div>
+
+        <h1 className="text-4xl md:text-5xl font-fancy text-valentine-pink mb-4 glow-text">
+          Hey you...
+        </h1>
+
+        <p className="text-valentine-blush mb-8">
+          This is for someone special. Enter the code to continue 💕
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4">
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Enter code..."
+            className={`w-64 px-6 py-4 rounded-xl bg-white/10 border-2 text-white text-center text-xl focus:outline-none transition-colors ${
+              error
+                ? 'border-red-500'
+                : 'border-valentine-pink/50 focus:border-valentine-pink'
+            }`}
+            autoFocus
+          />
+
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                className="text-red-400 text-sm"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                hmm that's not it... try again 🤔
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <motion.button
+            type="submit"
+            className="px-8 py-3 bg-gradient-to-r from-valentine-pink to-valentine-rose text-white rounded-full font-bold shadow-lg"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            let me in 💕
+          </motion.button>
+        </form>
+
+        <p className="text-valentine-blush/50 text-sm mt-8 italic">
+          (hint: if you're the right person, you'll know 😉)
+        </p>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // Main App
 export default function App() {
+  const [unlocked, setUnlocked] = useState(false)
   const [scene, setScene] = useState('intro')
   const [noTrapped, setNoTrapped] = useState(false)
   const [yesCaught, setYesCaught] = useState(false)
@@ -872,6 +966,10 @@ export default function App() {
     <Challenge3 key="c3" onComplete={handleChallengeComplete} />,
     <Challenge4 key="c4" onComplete={handleChallengeComplete} />,
   ]
+
+  if (!unlocked) {
+    return <PasscodeScreen onUnlock={() => setUnlocked(true)} />
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
